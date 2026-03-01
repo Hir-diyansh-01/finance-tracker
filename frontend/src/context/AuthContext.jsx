@@ -8,8 +8,9 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🟢 Backend Base URL (change on deploy)
+  // 🟢 Backend Base URL
   const API_BASE_URL = process.env.REACT_APP_API_URL;
+
   // 🟢 Initialize states
   const [token, setToken] = useState(() => localStorage.getItem("token") || null);
   const [user, setUser] = useState(() => {
@@ -22,13 +23,13 @@ export const AuthProvider = ({ children }) => {
 
   // 🟢 Fetch user profile
   const fetchProfile = useCallback(async () => {
-    if (!token) return;
+    if (!token || !API_BASE_URL) return;
+
     try {
       const res = await axios.get(`${API_BASE_URL}/api/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // ✅ Force-refresh image with cache-busting
       const updatedUser = {
         ...res.data,
         profilePic: res.data.profilePic
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("❌ Profile fetch error:", err.response?.data || err.message);
     }
-  }, [token]);
+  }, [token, API_BASE_URL]); // ✅ FIXED HERE
 
   // 🔁 Auto-fetch on token change
   useEffect(() => {
